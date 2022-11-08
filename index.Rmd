@@ -1,5 +1,6 @@
 ---
 title: "IODS course project"
+author: "Hanieh Heidarpour Kiaei"
 output:
   html_document:
     theme: cosmo

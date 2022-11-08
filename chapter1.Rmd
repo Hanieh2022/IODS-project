@@ -9,5 +9,12 @@
 date()
 
 ```
-The text continues here.
+I already had installed R and RStudio on my computer, but installing Git and proceeding with making personal repository, and linking the RStudio with GitHub was a new exciting experience. I knew that github is a daily-used tool for computer scientists, now I am very happy that I know at least some basics about this tool. 
+
+My GitHub repository link is:
+https://github.com/Hanieh2022/IODS-project
+
+
+Regarding the course, honestly I still have no clear idea about "Open" Data Science. What does "open" mean here? Besides the title, I took this course to improve my skill in working with R, as I had learned basics of R in Quantitative Research Skill last academic period.  
+Reviewing the first four chapters of RHDS book was really helpful. I know much more about each function/operator in R than the first time I read this book in Quantitative Research Skill course. I feel more confident now and I hope after Open Data Science course, I can easily code in R without copy-pasting.
 
