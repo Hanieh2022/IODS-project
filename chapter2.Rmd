@@ -10,4 +10,117 @@
 date()
 ```
 
-Here we go again...
+# 1. Dataset description
+
+```{r}
+library(tidyverse)
+learning2014 <- read_csv('data/learning2014.csv')
+str(learning2014)
+```
+
+"learning2014" dataset is a subset of "JYTOPKYS3" dataset containing 7 variables:
+
+1. gender
+2. age
+3. attitude
+4. deep (deep questions): combined of 12 variables from the original data set (starting with "D" letter)
+5. stra (strategic questions): combined of 8 variables from the original data set (starting with "ST")
+6. suf (surface questions): combined of 12 variables from the original data set (starting with "SU")
+7. points: from statistics course exam
+
+
+"deep", "stra", and "suf" are calculated by combining and averaging their corresponding variables.
+
+
+# 2. Graphical overview
+
+
+```{r}
+# Access the gglot2 library
+library(ggplot2)
+
+summary(learning2014)
+
+learning2014 %>% 
+  ggplot(aes(x = gender)) +
+  geom_bar()
+
+learning2014 %>% 
+  ggplot(aes(x = age)) +
+  geom_histogram()
+
+learning2014 %>% 
+  ggplot(aes(x = attitude)) +
+  geom_histogram()
+
+learning2014 %>% 
+  ggplot(aes(x = deep)) +
+  geom_histogram()
+
+learning2014 %>% 
+  ggplot(aes(x = stra)) +
+  geom_histogram()
+
+learning2014 %>% 
+  ggplot(aes(x = surf)) +
+  geom_histogram()
+
+learning2014 %>% 
+  ggplot(aes(x = points)) +
+  geom_histogram()
+
+```
+
+Gender graph obviously shows that the number of female participants are almost twice the number of males.
+According to the age graph, majority of participants are 20-25 years old.
+The attitude graph seems to follow a normal distribution which indicate most of participant have a moderate attitude toward statistics.
+Comparing the mean of "deep" and the "surf", it shows the students tend to learn the course material more deeply, instead of surface studying.
+
+
+# 3. Fitting regression line
+
+
+```{r}
+# Regression model with three explantory variables 
+my_model_1 <- lm(points ~ attitude + stra + deep, data = learning2014)
+summary(my_model_1)
+
+# Excluding "deep" variable due to its insignificant relationship with  "points"
+my_model_2 <- lm(points ~ attitude + stra, data = learning2014)
+summary(my_model_2)
+
+# Excluding "stra" variable as well
+my_model_3 <- lm(points ~ attitude, data = learning2014)
+summary(my_model_3)
+
+
+```
+
+In the first  model, we have used three explanatory variables of "attitude", "stra",
+and "deep". According to the summary, there is no significant relationship between "deep"
+and "points". Thus, we removed "deep" variable from the model, and fit the model again with
+"attitude" and "stra" as the explanatory variables; still, it seems "stra" has not statistically
+significant relationship with our target variable, "points". So, we fit the model once again
+with only "attitude" as its explanatory variable. The summary shows a significant linear relationship
+between "attitude" and "points" which means those who have positive attitude toward statistics, get
+better points in this course.
+
+
+# 4. Parameter interpretaion
+
+Using the summary of fitted model, multiple R-squared in all three level, is low which indicates a weak relationship between our explanatory variables and points. However only one of these weak estimating relationship (between attitude and points) is significant.
+
+# 5. diagnostic plots
+
+```{r}
+library(ggfortify)
+autoplot(my_model_3)
+```
+The assumptions of linear regression are: 
+- The relationship between the predictor (x) and the outcome (y) is assumed to be linear.
+- The residual errors are assumed to be normally distributed.
+- The residuals are assumed to have a constant variance (homoscedasticity)
+- residuals error terms are independent.
+
+We have checked the above assumptions by diagnostic plots. Residual vs Fitted plot is without pattern that shows the relationship between variables (attitude and points) is linear. Normal Q-Q plot follows a straight line which shows residuals have normally distributed. From Residuals vs Leverage plot, we see there is only three influential/extreme values in the data (#71, #35, #56) 
+
