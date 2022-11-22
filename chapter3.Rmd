@@ -1,0 +1,152 @@
+# Logistic Regression
+
+```{r}
+date()
+```
+
+## Task 2
+
+```{r}
+library(dplyr)
+
+alc <- read.csv("data/alc.csv")
+glimpse(alc)
+colnames(alc)
+```
+the 'alc' data set contains 370 rows and 35 columns. We generated this data set through combining the two data sets from secondary school students in math class and portuguese language class regarding their study performance. We did this combination by removing the free columns which varied in two data sets, and keeping the common columns in two data sets. Now, our joined/combined data set have 35 variables.
+
+## Task 3
+
+dependent variable: high/low alcohol consumption (high_use)
+explanatory variables: school absences, age, family relationships (famrel), going out with friends (goout)
+hypothesis:
+
+- school absences is more prevalent among students who consume more alcohol.
+- Older students consume more alcohol compare to youngers.
+- student who highly consume alcohol, have worse relationship with their family.
+- student who highly consume alcohol, spent more time out with friends.
+
+## Task 4
+
+```{r}
+library(ggplot2)
+
+#  plot of high_use 
+g0 <- ggplot(alc, aes(x = high_use))
+g0 + geom_bar()
+
+#  plot of high_use and absences
+g1 <- ggplot(alc, aes(x = absences, y = high_use ))
+g1 + geom_boxplot()
+
+#  plot of high_use and age
+g2 <- ggplot(alc, aes(x = age, y = high_use ))
+g2 + geom_boxplot()
+
+#  plot of high_use and famrel
+g3 <- ggplot(alc, aes(x = famrel, y = high_use ))
+g3 + geom_boxplot()
+
+#  plot of high_use and goout
+g4 <- ggplot(alc, aes(x = goout, y = high_use ))
+g4 + geom_boxplot()
+ 
+# table of high_use and absences
+table(alc$high_use, alc$absences)
+      
+# table of high_use and age
+table(alc$high_use, alc$age)
+
+# table of high_use and famrel
+table(alc$high_use, alc$famrel)
+
+# table of high_use and goout
+table(alc$high_use, alc$goout)
+
+```
+According to the tables and graphs, my findings are:
+
+- There is no relationships between absence from school and alcohol consumption. 
+- 'age' does not explain the amount of alcohol consumption.
+- It seems students have a good relationships with their families regardless of the amount of alcohol consumption.
+- Our hypothesis is confirmed, as the students who go out more, are more likely to consume more alcohol.
+
+## Task 5
+
+```{r}
+# logistic regression model with glm()
+m <- glm(high_use ~ absences + age + famrel + goout, data = alc, family = "binomial")
+summary(m)
+
+# compute odds ratios (OR)
+OR <- coef(m) %>% exp
+
+# compute confidence intervals (CI)
+confint(m)
+CI <- exp(confint(m))
+CI
+
+# print out the odds ratios with their confidence intervals
+cbind(OR, CI)
+
+
+```
+
+According to the logistic regression model, we got more accurate outcomes regarding the relationship between our variables:
+
+- There is a significant predictor relationship between school absences and high alcohol consumption. The odds ratio is 1.07 which is in the confidence interval (1.03 - 1.12). P-value is 0.001 that indicates the relationship is significant. So, our hypothesis is confirmed. Those who consumes more alcohol are more likely to be absent at school.
+- Our model shows there is no significant relationship between age and alcohol consumption. Although the odds ratio is 1.08 which is in the confidence interval (0.87 - 1.35), P-value (which is 0.45) does not show significant relationship. Thus, our hypothesis is rejected.
+- The third hypothesis is true. There is a significant negative relationship between alcohol consumption and family relationship. The odds ratio (0.68) is in the confidence interval (0.52 - 0.89) and P-value (0.005) is significant. Also, the estimate value is -0.37 which indicates negative relationship. It means those who consumes more alcohol probably have worse relationship with their families. 
+- The most significant is shown between high alcohol consumption and going out with friends. The odds ratio is 2.14 which is at the middle of the confidence interval (1.69-2.73). P-value is 3.8e-10 and estimate value is 0.76 show a strong significant relationship between alcohol consumption and 'goout' variable. Our model confirmed our hypothesis that those who consume more alcohol are more likely to spend more time outdoor.
+
+
+
+## Task 6
+
+```{r}
+# Work with the exercise in this chunk, step-by-step. Fix the R code!
+# alc is available
+
+# fit the model
+model <- glm(high_use ~ goout + famrel + absences, data = alc, family = "binomial")
+
+# predict() the probability of high_use
+probabilities <- predict(model, type = "response")
+
+library(dplyr)
+# add the predicted probabilities to 'alc'
+alc <- mutate(alc, probability = probabilities)
+
+# use the probabilities to make a prediction of high_use
+alc <- mutate(alc, prediction = probability > 0.5)
+
+# tabulate the target variable versus the predictions
+table(high_use = alc$high_use, prediction = alc$prediction)
+
+# Computing the total proportion of inaccurately classified individuals
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong) 
+}
+
+inaccurately_classified <- loss_func(alc$high_use, alc$prediction)
+inaccurately_classified
+
+```
+To evaluate how our prediction is reliable, we provide the 2x2 cross tabulation of prediction versus the actual values. According to this table, for 236 + 44 = 280 cases, our model predicts the correct value. However, for 23 + 67 = 90 cases, its prediction is inaccurate. The loss function tells us the total proportion of inaccurately classified individuals are 0.24 percent.
+Comparing the prediction power of our model with a simple guessing strategy, our model considerably better predict the value because the training error is much less than 0.50 percent (0.24 < 0.50).
+
+
+## Task 7
+
+```{r}
+# K-fold cross-validation
+library(boot)
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = model, K = 10)
+
+
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+```
+
+The test set performance in our model is 0.25, which is a slightly higher than the test set performance in the Exercise3 which was 0.24.
