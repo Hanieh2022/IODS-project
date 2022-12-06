@@ -71,6 +71,7 @@ biplot(pca_human, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab
 
 
 ```
+
 Comparing the raw data and standardized data:
 The results from two PCA (raw and standardized) are quit different. 
 Plotting the PCA by raw data, we see that GNI variable which has high variance contributes largely in PCA, while other variables with lower variance have slight effect on PCA. After standardizing, the emphasis on GNI becomes less and other variables are taken into account and contribute more in PCA. 
@@ -97,15 +98,16 @@ str(tea)
 dim(tea)
 View(tea)
 
+
 library(dplyr)
 library(tidyr)
 # column names to keep in the data set
 keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
 
-# select the 'keep_columns' to create a new data set
-tea_time <- select(tea, keep_columns)
+# select the keep_columns to create a new data set
+tea_time <- dplyr::select(tea, all_of(keep_columns))
 
-# look at the dimentions and structure of the data
+# look at the dimensions and structure of the data
 dim(tea_time)
 str(tea_time)
 
@@ -126,8 +128,6 @@ summary(mca)
 
 # visualize MCA
 plot(mca, invisible=c("ind"), graph.type = "classic", habillage = "quali")
-
-
 ```
 
 Interpretation of multiple correspondence analysis:
