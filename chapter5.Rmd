@@ -1,0 +1,136 @@
+# Dimentionality Reduction Technigues
+
+## Analysis Exercises
+
+```{r}
+date()
+```
+
+```{r}
+human <- read.csv("data/human2.txt")
+
+```
+
+## Task 1
+
+```{r}
+# summarise and visualize the 'human' data set 
+library(GGally)
+summary(human)
+str(human)
+ggpairs(human)
+
+library(corrplot)
+cor(human)
+cor(human) %>% corrplot()
+
+
+```
+
+Description: 
+The 'human' data set consists of 155 observation and 8 variables. 6 out of 8 variables are numeric and 2 variables are integer.
+I visualized the data set by 'ggpairs' function and surprisingly I got the all inportant information about correlation between variables (coefficient and significance) as well as their graphical view in a geom-point all in one graph! From this graph I see that the strongest correlation is between Life Expectancy and Maternal Mortality (-0.857) which is highly significant meaning that countries with low maternal mortality have higher life expectancy. On the other hand, the smallest correlation coefficient is seen between Labor Force Participation of Females and Secondary Education in Females which is insignificant. The distribution curve for all pairs of variables is skewed.
+Corplot also shows the same correlation between variables through a colorful graph. The blue point indicates the positive correlation between variables and the red color indicates the negative correlation. The darker the colors, the stronger the relationship between the variables. The most dark blue relates to relationship between each variable with itself, which is the strongest relationship but it does not seem a meaningful relationship. 
+ 
+
+## Task 2
+
+```{r}
+
+# perform principal component analysis (PCA) on the raw (non-standardized) human data
+pca_human <- prcomp(human)
+
+# draw a biplot of the principal component representation and the original variables
+biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+
+```
+
+
+## Task 3
+
+```{r}
+# Standardize the variables in the human data and perform PCA
+human_std <- scale(human)
+pca_human <- prcomp(human_std)
+
+# draw a biplot 
+biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+
+# create and print out a summary of pca_human
+s <- summary(pca_human)
+
+# print out the percentages of variance
+pca_pr <- round(100*s$importance[2, ], digits = 1)
+
+# create object pc_lab to be used as axis labels
+pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
+
+# draw a biplot with more information about PCs
+biplot(pca_human, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+
+
+
+```
+Comparing the raw data and standardized data:
+The results from two PCA (raw and standardized) are quit different. 
+Plotting the PCA by raw data, we see that GNI variable which has high variance contributes largely in PCA, while other variables with lower variance have slight effect on PCA. After standardizing, the emphasis on GNI becomes less and other variables are taken into account and contribute more in PCA. 
+
+
+## Task 4
+
+
+Interpretations of two principal component dimensions:
+From the biplot, We see that six variables including Edu.Exp, Edu2.FM, Life.Exp, GNI, Mat.Mor, Ado.Birth have high correlation with PC1 (x axis), while two variables including Lab.FM and Parli.F have high correlation with PC2 (y axis). As percentage values shows, the PC1 is bigger dimention (53.6%) compared to PC2 (16.2%). 
+Among variables, the smaller angle between arrows shows the higher correlation between variables. So four variable at the left side of the graph including Edu.Exp, Edu2.FM, Life.Exp, GNI have higer correlation with each other, two variables on the top of the grapg including Lab.FM and Parli.F have higher correlation with each other and two variable at the right side of the graph including Mat.Mor, Ado.Birth have higher correlation with each other. 
+The length of the arrows is proportional to the standard deviations of the variables. It seems Mat.Mor, Edu.Exp and Life.Exp variable has the longer arrows, then the larger standard deviation from the mean.
+
+
+## Task 5
+
+
+```{r}
+
+tea <- read.csv("https://raw.githubusercontent.com/KimmoVehkalahti/Helsinki-Open-Data-Science/master/datasets/tea.csv", stringsAsFactors = TRUE)
+
+# explore the data set
+str(tea)
+dim(tea)
+View(tea)
+
+library(dplyr)
+library(tidyr)
+# column names to keep in the data set
+keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
+
+# select the 'keep_columns' to create a new data set
+tea_time <- select(tea, keep_columns)
+
+# look at the dimentions and structure of the data
+dim(tea_time)
+str(tea_time)
+
+# visualize the data set
+library(ggplot2)
+pivot_longer(tea_time, cols = everything()) %>% 
+  ggplot(aes(value)) + facet_wrap("name", scales = "free")+
+  geom_bar()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
+
+library(FactoMineR)
+# perform multiple correspondence analysis (MCA)
+mca <- MCA(tea_time, graph = FALSE)
+
+# summary of the model
+summary(mca)
+
+# visualize MCA
+plot(mca, invisible=c("ind"), graph.type = "classic", habillage = "quali")
+
+
+```
+
+Interpretation of multiple correspondence analysis:
+The MCA model has identified 3 dimensions in tea-time data. By summarizing the MCA model we can see the correlation of each variable or individual or category with its corresponding dimension.
+Biplot provides a two-dimensional map of categories of variables. From the percent values we see that the two dimensions 1 and 2 are sufficient to retain about 30% of the total variation contained in our data.
+The categories close to x axis e.g. 'sugar' and 'No sugar' are categories who have the major contribution to the dimension 1, while those around the y axis e.g. 'lunch' and 'Not lunch' have an important contribution to dimension 2. 
