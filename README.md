@@ -1,2 +1,2 @@
-# IODS-project
-Template for the IODS course
+# Intoduction to Open Data Science
+Weekly assignmnets for Introduction to Open Data Scinece course 
